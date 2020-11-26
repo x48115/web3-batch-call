@@ -11,6 +11,7 @@ class BatchCall {
       provider,
       flattenResponse,
       clearMemoryAfterExecution,
+      logging,
     } = config;
 
     if (typeof web3 === "undefined" && typeof provider === "undefined") {
@@ -34,9 +35,12 @@ class BatchCall {
     this.abiByHash = {};
     this.flattenResponse = flattenResponse;
     this.clearMemoryAfterExecution = clearMemoryAfterExecution;
+    this.logging = logging;
   }
 
   async execute(contracts, blockNumber) {
+    const startTime = Date.now();
+    let numberOfMethods = 0;
     const { web3 } = this;
     const addContractToBatch = async (batch, contractConfig) => {
       const {
@@ -98,6 +102,7 @@ class BatchCall {
         } else {
           methodCall = contract.methods[name]().call;
         }
+        numberOfMethods += 1;
         const returnResponse = (err, data) => {
           if (err) {
             methodReject(err);
@@ -215,6 +220,13 @@ class BatchCall {
     if (this.clearMemoryAfterExecution) {
       this.abiHashByAddress = {};
       this.abiByHash = {};
+    }
+    const endTime = Date.now();
+    if (this.logging) {
+      const executionTime = endTime - startTime;
+      console.log(
+        `[BatchCall] methods: ${numberOfMethods}, execution time: ${executionTime} ms`
+      );
     }
     return contractsToReturn;
   }

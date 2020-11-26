@@ -43,6 +43,7 @@ https://batchcall.finance
     allMethods,                // Specify true/flase (default is false). If true the contract ABI will be used to fetch state for all viewable methods with no inputs
     flattenResponse,           // Specify true/false (default is false). If true ignore namespaces and return a flattened list of contract states
     clearMemoryAfterExecution, // Specify true/false (default is false). If true cached ABIs will by removed after the batch call is complete
+    logging,                   // Specify true/false (defaulse is false). If true every batch call will print the number of methods invoked as well as total execution time
     methods: [
       // Array of methods with custom arguments
       {
@@ -98,6 +99,7 @@ const contracts = [
     ],
     allMethods: true,
     flattenResponse: false,
+    logging: false,
     methods: [
       {
         name: "balanceOf",
