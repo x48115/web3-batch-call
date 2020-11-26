@@ -9,7 +9,7 @@ class BatchCall {
     const {
       web3,
       provider,
-      flattenResponse,
+      groupByNamespace,
       clearMemoryAfterExecution,
       logging,
     } = config;
@@ -33,7 +33,7 @@ class BatchCall {
     this.etherscanDelayTime = delayTime;
     this.abiHashByAddress = {};
     this.abiByHash = {};
-    this.flattenResponse = flattenResponse;
+    this.groupByNamespace = groupByNamespace;
     this.clearMemoryAfterExecution = clearMemoryAfterExecution;
     this.logging = logging;
   }
@@ -201,7 +201,7 @@ class BatchCall {
     }
 
     let contractsToReturn = contractsState;
-    if (!this.flattenResponse) {
+    if (this.groupByNamespace) {
       const contractsStateByNamespace = _.groupBy(contractsState, "namespace");
 
       const removeNamespaceKey = (acc, contracts, key) => {
@@ -221,8 +221,8 @@ class BatchCall {
       this.abiHashByAddress = {};
       this.abiByHash = {};
     }
-    const endTime = Date.now();
     if (this.logging) {
+      const endTime = Date.now();
       const executionTime = endTime - startTime;
       console.log(
         `[BatchCall] methods: ${numberOfMethods}, execution time: ${executionTime} ms`

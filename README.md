@@ -37,14 +37,15 @@ https://batchcall.finance
  */
 [
   {
-    namespace,                 // Specify a namespace to identify this configuration. Namespace will be used to group contract results
-    addresses,                 // Specify a list of addresses to iterate through for this contract config
-    abi,                       // Specify an ABI to use for all addresses in this contract config. If no ABI is specified a unqiue ABI will be fetched and cached for every address. Specifying an ABI is recommended because fetching ABIs via etherscan is time consuming
-    allMethods,                // Specify true/flase (default is false). If true the contract ABI will be used to fetch state for all viewable methods with no inputs
-    flattenResponse,           // Specify true/false (default is false). If true ignore namespaces and return a flattened list of contract states
-    clearMemoryAfterExecution, // Specify true/false (default is false). If true cached ABIs will by removed after the batch call is complete
+    namespace,                 // Specify a namespace to identify this configuration. Optional. Namespace will be used to group contract results
+    addresses,                 // Specify a list of addresses to iterate through for this config. Must select addresses OR contracts
+    contracts,                 // Specify a list of contract objects to iterate through for this config. Must select addresses OR contracts
+    abi,                       // Specify an ABI to use for all addresses in this contract config. If no ABI is specified a unqiue ABI will be fetched and cached for every address. If contracts are supplied ABI is optional, but ABI is required regardless if the "readAllMethods" option is set
+    groupByNamespace,          // Specify true/false (default is false). If true contracts will be groups hierarchicly by namespace
+    clearMemoryAfterExecution, // Specify true/false (default is false). If true cached ABIs will by removed after the batch call is complete. Only recommended if you have many large/different ABIs. Time vs memory trade-off
     logging,                   // Specify true/false (defaulse is false). If true every batch call will print the number of methods invoked as well as total execution time
-    methods: [
+    readAllMethods,            // Specify true/flase (default is false). If true the contract ABI will be used to fetch state for all viewable methods with no inputs
+    readMethods: [
       // Array of methods with custom arguments
       {
         name, // method name
@@ -98,7 +99,7 @@ const contracts = [
       "0x29E240CFD7946BA20895a7a02eDb25C210f9f324",
     ],
     allMethods: true,
-    flattenResponse: false,
+    groupByNamespace: false,
     logging: false,
     methods: [
       {
