@@ -38,18 +38,20 @@ class BatchCall {
     this.logging = logging;
   }
 
-  async execute(contracts, blockNumber) {
+  async execute(contractsBatch, blockNumber) {
     const startTime = Date.now();
     let numberOfMethods = 0;
     const { web3 } = this;
     const addContractToBatch = async (batch, contractConfig) => {
       const {
         addresses,
+        contracts,
         namespace = "default",
         readMethods = [],
         allReadMethods,
       } = contractConfig;
-      const addressPromises = await addresses.map(
+      const objectToIterateOver = addresses || contracts;
+      const addressPromises = await objectToIterateOver.map(
         addAddressToBatch.bind(
           null,
           batch,
@@ -66,9 +68,19 @@ class BatchCall {
       readMethods,
       allReadMethods,
       namespace,
-      address
+      item
     ) => {
-      const abi = this.getAbiFromCache(address);
+      const itemIsContract = item.options;
+      let address;
+      let abi;
+      if (itemIsContract) {
+        address = item.options.address;
+        abi = item.options.jsonInterface;
+      } else {
+        address = item;
+        abi = this.getAbiFromCache(address);
+      }
+
       const contract = new web3.eth.Contract(abi, address);
 
       let allMethods = _.clone(readMethods);
@@ -172,18 +184,21 @@ class BatchCall {
       return acc;
     };
 
-    const addAbis = async (contract) => {
-      const { abi, addresses } = contract;
+    const addAbis = async (contractBatch) => {
+      const { abi, addresses } = contractBatch;
       for (const address of addresses) {
         await this.addAbiToCache(address, abi);
       }
     };
-    for (const contract of contracts) {
-      await addAbis(contract);
+    for (const contractBatch of contractsBatch) {
+      const { contracts } = contractBatch;
+      if (!contracts) {
+        await addAbis(contractBatch);
+      }
     }
 
     const batch = new web3.BatchRequest();
-    const contractsPromises = contracts.map(
+    const contractsPromises = contractsBatch.map(
       addContractToBatch.bind(null, batch)
     );
 

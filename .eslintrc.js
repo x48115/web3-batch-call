@@ -10,7 +10,7 @@ module.exports = {
   },
   rules: {
     "arrow-parens": ["error", "always"],
-    "max-depth": ["error", 1],
+    "max-depth": ["error", 2],
     "max-nested-callbacks": ["error", 0],
     "arrow-body-style": [2, "as-needed"],
     "func-names": ["error", "always"],
