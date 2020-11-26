@@ -37,11 +37,12 @@ https://batchcall.finance
  */
 [
   {
-    namespace,       // Specify a namespace to identify this configuration. Namespace will be used to group contract results
-    addresses,       // Specify a list of addresses to iterate through for this contract config
-    abi,             // Specify an ABI to use for all addresses in this contract config. If no ABI is specified a unqiue ABI will be fetched and cached for every address. Specifying an ABI is recommended because fetching ABIs via etherscan is time consuming
-    allMethods,      // Specify true/flase (default is false). If true the contract ABI will be used to fetch state for all viewable methods with no inputs
-    flattenResponse, // Specify true/false (default is false). If true ignore namespaces and return a flattened list of contract states
+    namespace,                 // Specify a namespace to identify this configuration. Namespace will be used to group contract results
+    addresses,                 // Specify a list of addresses to iterate through for this contract config
+    abi,                       // Specify an ABI to use for all addresses in this contract config. If no ABI is specified a unqiue ABI will be fetched and cached for every address. Specifying an ABI is recommended because fetching ABIs via etherscan is time consuming
+    allMethods,                // Specify true/flase (default is false). If true the contract ABI will be used to fetch state for all viewable methods with no inputs
+    flattenResponse,           // Specify true/false (default is false). If true ignore namespaces and return a flattened list of contract states
+    clearMemoryAfterExecution, // Specify true/false (default is false). If true cached ABIs will by removed after the batch call is complete
     methods: [
       // Array of methods with custom arguments
       {
