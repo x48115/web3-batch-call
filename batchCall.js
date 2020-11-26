@@ -6,7 +6,7 @@ const fetch = require("cross-fetch");
 
 class BatchCall {
   constructor(config) {
-    const { web3, provider } = config;
+    const { web3, provider, flattenResponse } = config;
 
     if (typeof web3 === "undefined" && typeof provider === "undefined") {
       throw new Error(
@@ -27,6 +27,7 @@ class BatchCall {
     this.etherscanDelayTime = delayTime;
     this.abiHashByAddress = {};
     this.abiByHash = {};
+    this.flattenResponse = flattenResponse;
   }
 
   async execute(contracts, blockNumber) {
@@ -188,20 +189,24 @@ class BatchCall {
       return { error: err.message };
     }
 
-    const contractsStateByNamespace = _.groupBy(contractsState, "namespace");
+    let contractsToReturn = contractsState;
+    if (!this.flattenResponse) {
+      const contractsStateByNamespace = _.groupBy(contractsState, "namespace");
 
-    const removeNamespaceKey = (acc, contracts, key) => {
-      const omitNamespace = (contract) => _.omit(contract, "namespace");
-      acc[key] = _.map(contracts, omitNamespace);
-      return acc;
-    };
+      const removeNamespaceKey = (acc, contracts, key) => {
+        const omitNamespace = (contract) => _.omit(contract, "namespace");
+        acc[key] = _.map(contracts, omitNamespace);
+        return acc;
+      };
 
-    const contractsStateByNamespaceReduced = _.reduce(
-      contractsStateByNamespace,
-      removeNamespaceKey,
-      {}
-    );
-    return contractsStateByNamespaceReduced;
+      const contractsStateByNamespaceReduced = _.reduce(
+        contractsStateByNamespace,
+        removeNamespaceKey,
+        {}
+      );
+      contractsToReturn = contractsStateByNamespaceReduced;
+    }
+    return contractsToReturn;
   }
 
   async addAbiToCache(address, providedAbi) {
