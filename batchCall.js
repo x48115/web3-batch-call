@@ -35,27 +35,33 @@ class BatchCall {
       const {
         addresses,
         namespace = "default",
-        methods = [],
-        allMethods,
+        readMethods = [],
+        allReadMethods,
       } = contractConfig;
       const addressPromises = await addresses.map(
-        addAddressToBatch.bind(null, batch, methods, allMethods, namespace)
+        addAddressToBatch.bind(
+          null,
+          batch,
+          readMethods,
+          allReadMethods,
+          namespace
+        )
       );
       return await Promise.all(addressPromises);
     };
 
     const addAddressToBatch = async (
       batch,
-      methods,
-      readAllMethods,
+      readMethods,
+      allReadMethods,
       namespace,
       address
     ) => {
       const abi = this.getAbiFromCache(address);
       const contract = new web3.eth.Contract(abi, address);
 
-      let allMethods = _.clone(methods);
-      if (readAllMethods) {
+      let allMethods = _.clone(readMethods);
+      if (allReadMethods) {
         const formatField = (name) => ({ name });
         const allFields = this.getReadableAbiFields(address).map(formatField);
         allMethods.push(...allFields);
@@ -130,8 +136,9 @@ class BatchCall {
         if (!args) {
           delete methodArg.args;
         }
-        if (!existingMethodInput) {
+        if (!existingMethodInput && foundAddressResult) {
           methodArgs.push(methodArg);
+          addressResult[method] = methodArgs;
         }
         if (!input && foundAddressResult) {
           addressResult[method] = [methodArg];
