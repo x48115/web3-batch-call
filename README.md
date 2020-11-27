@@ -42,8 +42,8 @@ https://batchcall.finance
     contracts,                 // Specify a list of contract objects to iterate through for this config. Must select addresses OR contracts
     abi,                       // Specify an ABI to use for all addresses in this contract config. If no ABI is specified a unqiue ABI will be fetched and cached for every address. If contracts are supplied ABI is optional, but ABI is required regardless if the "readAllMethods" option is set
     groupByNamespace,          // Specify true/false (default is false). If true contracts will be groups hierarchicly by namespace
-    clearMemoryAfterExecution, // Specify true/false (default is false). If true cached ABIs will by removed after the batch call is complete. Only recommended if you have many large/different ABIs. Time vs memory trade-off
-    logging,                   // Specify true/false (defaulse is false). If true every batch call will print the number of methods invoked as well as total execution time
+    logging,                   // Specify true/false (default is false). If true every batch call will print the number of methods invoked as well as total execution time
+    simplifyResponse,          // Specify true/false (default is false). If true response args will only have one value instead of an array of values. For instance, "balanceOf: 3434452155", instead of "balanceOf: [{ value: 3434452155, input: 0x3464545, args: ['0x123...'] }]"
     readAllMethods,            // Specify true/flase (default is false). If true the contract ABI will be used to fetch state for all viewable methods with no inputs
     readMethods: [
       // Array of methods with custom arguments

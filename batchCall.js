@@ -6,7 +6,13 @@ const fetch = require("cross-fetch");
 
 class BatchCall {
   constructor(config) {
-    const { web3, provider, groupByNamespace, logging } = config;
+    const {
+      web3,
+      provider,
+      groupByNamespace,
+      logging,
+      simplifyResponse,
+    } = config;
 
     if (typeof web3 === "undefined" && typeof provider === "undefined") {
       throw new Error(
@@ -29,6 +35,7 @@ class BatchCall {
     this.abiByHash = {};
     this.groupByNamespace = groupByNamespace;
     this.logging = logging;
+    this.simplifyResponse = simplifyResponse;
   }
 
   async execute(contractsBatch, blockNumber) {
@@ -209,6 +216,21 @@ class BatchCall {
     }
 
     let contractsToReturn = contractsState;
+
+    if (this.simplifyResponse) {
+      const flattenArgs = (contract) => {
+        const flattenArg = (val, key) => {
+          const flattenedVal = val[0].value;
+          if (flattenedVal) {
+            contract[key] = flattenedVal;
+          }
+        };
+        _.each(contract, flattenArg);
+        return contract;
+      };
+      contractsToReturn = _.map(contractsToReturn, flattenArgs);
+    }
+
     if (this.groupByNamespace) {
       const contractsStateByNamespace = _.groupBy(contractsState, "namespace");
 
