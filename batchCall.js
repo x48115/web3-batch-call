@@ -36,6 +36,7 @@ class BatchCall {
     this.groupByNamespace = groupByNamespace;
     this.logging = logging;
     this.simplifyResponse = simplifyResponse;
+    this.readContracts = {};
   }
 
   async execute(contractsBatch, blockNumber) {
@@ -90,10 +91,21 @@ class BatchCall {
         allMethods.push(...allFields);
       }
 
+      const filterOutConstants = (method) => {
+        const readContractAtLeastOnce = this.readContracts[address];
+        const { constant } = method;
+        if (constant && readContractAtLeastOnce) {
+          return false;
+        }
+        return true;
+      };
+      allMethods = _.filter(allMethods, filterOutConstants);
+
       const methodsPromises = await allMethods.map(
         addMethodToBatch.bind(null, batch, contract, abi, address)
       );
       const methodsState = await Promise.all(methodsPromises);
+      this.readContracts[address] = true;
       return Promise.resolve({
         address,
         namespace,
@@ -281,14 +293,16 @@ class BatchCall {
 
   getReadableAbiFields(address) {
     const abi = this.getAbiFromCache(address);
+    const readContractAtLeastOnce = this.readContracts[address];
     const getReadableFields = (acc, field) => {
-      const { name, inputs, stateMutability, outputs } = field;
+      const { name, inputs, stateMutability, outputs, constant } = field;
       const nbrInputs = _.size(inputs);
       const nbrOutputs = _.size(outputs);
       const hasInputs = nbrInputs > 0;
       const hasOutputs = nbrOutputs > 0;
       const viewable = stateMutability === "view";
-      if (!hasInputs && hasOutputs && name && viewable) {
+      const skip = readContractAtLeastOnce && constant;
+      if (!hasInputs && hasOutputs && name && viewable && !skip) {
         acc.push(name);
       }
       return acc;

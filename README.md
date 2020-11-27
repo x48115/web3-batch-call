@@ -15,6 +15,7 @@ https://batchcall.finance
 - Supply your own ABIs or automatically fetch and cache ABIs
 - Supports custom contract namespaces
 - Supports historical blocks
+- Automatically prevents calling constant methods more than once
 - Isomorphic (works on node and in the browser)
 
 ## Use Cases
