@@ -49,8 +49,9 @@ https://batchcall.finance
     readMethods: [
       // Array of methods with custom arguments
       {
-        name, // method name
-        args, // array of method arguments
+        name,     // method name
+        args,     // array of method arguments
+        constant, // default is false. if true only read this method one time
       },
     ],
   },
