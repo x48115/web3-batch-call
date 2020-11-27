@@ -6,13 +6,7 @@ const fetch = require("cross-fetch");
 
 class BatchCall {
   constructor(config) {
-    const {
-      web3,
-      provider,
-      groupByNamespace,
-      clearMemoryAfterExecution,
-      logging,
-    } = config;
+    const { web3, provider, groupByNamespace, logging } = config;
 
     if (typeof web3 === "undefined" && typeof provider === "undefined") {
       throw new Error(
@@ -34,7 +28,6 @@ class BatchCall {
     this.abiHashByAddress = {};
     this.abiByHash = {};
     this.groupByNamespace = groupByNamespace;
-    this.clearMemoryAfterExecution = clearMemoryAfterExecution;
     this.logging = logging;
   }
 
@@ -231,10 +224,6 @@ class BatchCall {
         {}
       );
       contractsToReturn = contractsStateByNamespaceReduced;
-    }
-    if (this.clearMemoryAfterExecution) {
-      this.abiHashByAddress = {};
-      this.abiByHash = {};
     }
     if (this.logging) {
       const endTime = Date.now();
