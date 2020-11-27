@@ -293,16 +293,14 @@ class BatchCall {
 
   getReadableAbiFields(address) {
     const abi = this.getAbiFromCache(address);
-    const readContractAtLeastOnce = this.readContracts[address];
     const getReadableFields = (acc, field) => {
-      const { name, inputs, stateMutability, outputs, constant } = field;
+      const { name, inputs, stateMutability, outputs } = field;
       const nbrInputs = _.size(inputs);
       const nbrOutputs = _.size(outputs);
       const hasInputs = nbrInputs > 0;
       const hasOutputs = nbrOutputs > 0;
       const viewable = stateMutability === "view";
-      const skip = readContractAtLeastOnce && constant;
-      if (!hasInputs && hasOutputs && name && viewable && !skip) {
+      if (!hasInputs && hasOutputs && name && viewable) {
         acc.push(name);
       }
       return acc;
