@@ -1,8 +1,6 @@
 const Web3 = require("web3");
 const _ = require("lodash");
-const md5 = require("md5");
-const delay = require("delay");
-const fetch = require("cross-fetch");
+const AbiStorage = require("./utils/abiStorage");
 
 class BatchCall {
   constructor(config) {
@@ -12,6 +10,7 @@ class BatchCall {
       groupByNamespace,
       logging,
       simplifyResponse,
+      store,
     } = config;
 
     if (typeof web3 === "undefined" && typeof provider === "undefined") {
@@ -27,9 +26,9 @@ class BatchCall {
     }
 
     const { etherscan = {} } = config;
-    const { apiKey = null, delayTime = 300 } = etherscan;
+    const { apiKey: etherscanApiKey = null, delayTime = 300 } = etherscan;
 
-    this.etherscanApiKey = apiKey;
+    this.etherscanApiKey = etherscanApiKey;
     this.etherscanDelayTime = delayTime;
     this.abiHashByAddress = {};
     this.abiByHash = {};
@@ -37,6 +36,11 @@ class BatchCall {
     this.logging = logging;
     this.simplifyResponse = simplifyResponse;
     this.readContracts = {};
+    this.store = new AbiStorage({
+      store,
+      etherscanApiKey,
+      logging,
+    });
   }
 
   async execute(contractsBatch, blockNumber) {
@@ -79,7 +83,7 @@ class BatchCall {
         abi = item.options.jsonInterface;
       } else {
         address = item;
-        abi = this.getAbiFromCache(address);
+        abi = this.store.getAbiFromCache(address);
       }
 
       const contract = new web3.eth.Contract(abi, address);
@@ -87,7 +91,9 @@ class BatchCall {
       let allMethods = _.clone(readMethods);
       if (allReadMethods) {
         const formatField = (name) => ({ name });
-        const allFields = this.getReadableAbiFields(address).map(formatField);
+        const allFields = this.store
+          .getReadableAbiFields(address)
+          .map(formatField);
         allMethods.push(...allFields);
       }
 
@@ -199,7 +205,7 @@ class BatchCall {
     const addAbis = async (contractBatch) => {
       const { abi, addresses } = contractBatch;
       for (const address of addresses) {
-        await this.addAbiToCache(address, abi);
+        await this.store.addAbiToCache(address, abi);
       }
     };
     for (const contractBatch of contractsBatch) {
@@ -267,68 +273,6 @@ class BatchCall {
       );
     }
     return contractsToReturn;
-  }
-
-  async addAbiToCache(address, providedAbi) {
-    const cacheAbi = (newAbi) => {
-      const abiHash = md5(newAbi);
-      this.abiByHash[abiHash] = newAbi;
-      this.abiHashByAddress[address] = abiHash;
-    };
-    const cachedAbi = this.getAbiFromCache(address);
-    if (providedAbi) {
-      cacheAbi(providedAbi);
-    } else if (!cachedAbi) {
-      const abi = await this.fetchAbi(address);
-      cacheAbi(abi);
-      await delay(this.etherscanDelayTime);
-    }
-  }
-
-  getAbiFromCache(address) {
-    const abiHash = this.abiHashByAddress[address];
-    const abi = this.abiByHash[abiHash];
-    return abi;
-  }
-
-  getReadableAbiFields(address) {
-    const abi = this.getAbiFromCache(address);
-    const getReadableFields = (acc, field) => {
-      const { name, inputs, stateMutability, outputs } = field;
-      const nbrInputs = _.size(inputs);
-      const nbrOutputs = _.size(outputs);
-      const hasInputs = nbrInputs > 0;
-      const hasOutputs = nbrOutputs > 0;
-      const viewable = stateMutability === "view";
-      if (!hasInputs && hasOutputs && name && viewable) {
-        acc.push(name);
-      }
-      return acc;
-    };
-    const readableFields = [];
-    _.reduce(abi, getReadableFields, readableFields);
-    return readableFields;
-  }
-
-  async fetchAbi(address) {
-    const { etherscanApiKey } = this;
-    if (etherscanApiKey === null) {
-      throw new Error(
-        "No etherscan API key set ser! You either need to provide an etherscan API key, or provide your own ABI in your contract config."
-      );
-    }
-
-    let abi;
-    let responseData;
-    try {
-      const url = `https://api.etherscan.io/api?module=contract&action=getabi&address=${address}&apikey=${etherscanApiKey}`;
-      const response = await fetch(url);
-      responseData = await response.json();
-      abi = JSON.parse(responseData.result);
-    } catch (err) {
-      throw new Error("Etherscan error", responseData, err);
-    }
-    return abi;
   }
 }
 

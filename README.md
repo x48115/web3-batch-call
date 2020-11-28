@@ -13,6 +13,7 @@ https://batchcall.finance
 - Supply custom arguments to methods
 - Automatically fetch and populate state for viewable no-input methods
 - Supply your own ABIs or automatically fetch and cache ABIs
+- Supports localStorage or in-memory stores
 - Supports custom contract namespaces
 - Supports historical blocks
 - Automatically prevents calling constant methods more than once
@@ -42,6 +43,7 @@ https://batchcall.finance
     addresses,                 // Specify a list of addresses to iterate through for this config. Must select addresses OR contracts
     contracts,                 // Specify a list of contract objects to iterate through for this config. Must select addresses OR contracts
     abi,                       // Specify an ABI to use for all addresses in this contract config. If no ABI is specified a unqiue ABI will be fetched and cached for every address. If contracts are supplied ABI is optional, but ABI is required regardless if the "readAllMethods" option is set
+    store,                     // Specify a store to use for ABI caching. For front-end pass "localStorage." If no store is specified default to in-memory store
     groupByNamespace,          // Specify true/false (default is false). If true contracts will be groups hierarchicly by namespace
     logging,                   // Specify true/false (default is false). If true every batch call will print the number of methods invoked as well as total execution time
     simplifyResponse,          // Specify true/false (default is false). If true response args will only have one value instead of an array of values. For instance, "balanceOf: 3434452155", instead of "balanceOf: [{ value: 3434452155, input: 0x3464545, args: ['0x123...'] }]"
