@@ -120,7 +120,7 @@ class BatchCall {
     };
 
     const addMethodToBatch = (batch, contract, abi, address, method) =>
-      new Promise((methodResolve, methodReject) => {
+      new Promise((methodResolve) => {
         const { name, args } = method;
         let methodCall;
         const methodExists = _.get(contract.methods, name);
@@ -135,18 +135,17 @@ class BatchCall {
         numberOfMethods += 1;
         const returnResponse = (err, data) => {
           if (err) {
-            methodReject(err);
-          } else {
-            const abiMethod = _.find(abi, { name });
-            const input =
-              args && web3.eth.abi.encodeFunctionCall(abiMethod, args);
-            methodResolve({
-              method: method.name,
-              value: data,
-              input,
-              args,
-            });
+            console.log(`[BatchCall] ${address}: method call failed: ${name}`);
           }
+          const abiMethod = _.find(abi, { name });
+          const input =
+            args && web3.eth.abi.encodeFunctionCall(abiMethod, args);
+          methodResolve({
+            method: method.name,
+            value: data || "N/A",
+            input,
+            args,
+          });
         };
         let req;
         if (blockNumber) {
@@ -222,16 +221,8 @@ class BatchCall {
 
     let contractsState;
     batch.execute();
-    try {
-      const contractsPromiseResult = await Promise.all(contractsPromises);
-      contractsState = _.reduce(
-        contractsPromiseResult,
-        formatContractsState,
-        []
-      );
-    } catch (err) {
-      return { error: err.message };
-    }
+    const contractsPromiseResult = await Promise.all(contractsPromises);
+    contractsState = _.reduce(contractsPromiseResult, formatContractsState, []);
 
     let contractsToReturn = contractsState;
 
