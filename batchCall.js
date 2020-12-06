@@ -121,39 +121,55 @@ class BatchCall {
 
     const addMethodToBatch = (batch, contract, abi, address, method) =>
       new Promise((methodResolve) => {
-        const { name, args } = method;
-        let methodCall;
-        const methodExists = _.get(contract.methods, name);
-        if (!methodExists) {
-          return methodResolve();
-        }
-        if (args) {
-          methodCall = contract.methods[name](...args).call;
-        } else {
-          methodCall = contract.methods[name]().call;
-        }
-        numberOfMethods += 1;
-        const returnResponse = (err, data) => {
-          if (err) {
-            console.log(`[BatchCall] ${address}: method call failed: ${name}`);
-          }
+        try {
+          const { name, args } = method;
           const abiMethod = _.find(abi, { name });
-          const input =
-            args && web3.eth.abi.encodeFunctionCall(abiMethod, args);
-          methodResolve({
-            method: method.name,
-            value: data || "N/A",
-            input,
-            args,
-          });
-        };
-        let req;
-        if (blockNumber) {
-          req = methodCall.request(blockNumber, returnResponse);
-        } else {
-          req = methodCall.request(returnResponse);
+
+          let methodCall;
+          const methodExists = _.get(contract.methods, name);
+          if (!methodExists) {
+            return methodResolve();
+          }
+          const nbrAbiArgsForMethod = _.size(abiMethod.inputs);
+
+          /**
+           * In some cases a user may pass args that the ABI does not have. We need to make sure to always pass the
+           * correct number of inputs to our method call
+           */
+          const newArgs = _.take(args, nbrAbiArgsForMethod);
+
+          if (newArgs) {
+            methodCall = contract.methods[name](...newArgs).call;
+          } else {
+            methodCall = contract.methods[name]().call;
+          }
+          numberOfMethods += 1;
+          const returnResponse = (err, data) => {
+            if (err) {
+              console.log(
+                `[BatchCall] ${address}: method call failed: ${name}`
+              );
+            }
+            const input =
+              args && web3.eth.abi.encodeFunctionCall(abiMethod, newArgs);
+            methodResolve({
+              method: method.name,
+              value: data || "N/A",
+              input,
+              args,
+            });
+          };
+          let req;
+          if (blockNumber) {
+            req = methodCall.request(blockNumber, returnResponse);
+          } else {
+            req = methodCall.request(returnResponse);
+          }
+          batch.add(req);
+        } catch (err) {
+          console.log("method err");
+          methodResolve();
         }
-        batch.add(req);
       });
 
     const formatContractsState = (acc, contractConfig) => {
