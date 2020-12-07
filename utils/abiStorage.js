@@ -67,7 +67,7 @@ class Storage {
       const nbrOutputs = _.size(outputs);
       const hasInputs = nbrInputs > 0;
       const hasOutputs = nbrOutputs > 0;
-      const viewable = stateMutability === "view";
+      const viewable = stateMutability === "view" || stateMutability === "pure";
       if (!hasInputs && hasOutputs && name && viewable) {
         acc.push(name);
       }
