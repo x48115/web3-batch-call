@@ -6,6 +6,8 @@ web3-batch-call is a tool for querying large amounts of contract data in one jso
 
 https://batchcall.finance
 
+##### ^ ^ ^ This website uses an outdated version (1.0.0). For proper usage example see "Example Request" below.
+
 ## Features
 
 - Call out to many different contracts in a single batched request
@@ -41,13 +43,13 @@ https://batchcall.finance
   {
     namespace,                 // Specify a namespace to identify this configuration. Optional. Namespace will be used to group contract results
     addresses,                 // Specify a list of addresses to iterate through for this config. Must select addresses OR contracts
-    contracts,                 // Specify a list of contract objects to iterate through for this config. Must select addresses OR contracts
-    abi,                       // Specify an ABI to use for all addresses in this contract config. If no ABI is specified a unqiue ABI will be fetched and cached for every address. If contracts are supplied ABI is optional, but ABI is required regardless if the "readAllMethods" option is set
+    contracts,                 // Specify a list of contract objects to iterate through for this config. Must choose contract addresses OR web3 contract objects.
+    abi,                       // Specify an ABI to use for all addresses in this contract config. If no ABI is specified a unqiue ABI will be fetched and cached for every address. If contracts are supplied ABI is optional, but ABI is required regardless if the "allReadMethods" option is set
     store,                     // Specify a store to use for ABI caching. For front-end pass "localStorage." If no store is specified default to in-memory store
     groupByNamespace,          // Specify true/false (default is false). If true contracts will be groups hierarchicly by namespace
     logging,                   // Specify true/false (default is false). If true every batch call will print the number of methods invoked as well as total execution time
     simplifyResponse,          // Specify true/false (default is false). If true response args will only have one value instead of an array of values. For instance, "balanceOf: 3434452155", instead of "balanceOf: [{ value: 3434452155, input: 0x3464545, args: ['0x123...'] }]"
-    readAllMethods,            // Specify true/flase (default is false). If true the contract ABI will be used to fetch state for all viewable methods with no inputs
+    allReadMethods,            // Specify true/flase (default is false). If true the contract ABI will be used to fetch state for all viewable methods with no inputs
     readMethods: [
       // Array of methods with custom arguments
       {
@@ -75,11 +77,11 @@ const provider = "https://mainnet.infura.io/v3/<your_infura_api_key>";
 const etherscanApiKey = "<your_etherscan_api_key>"
 
 const options = {
-  provider, // Only required if not providing your own web3 instance
-  web3, // Only required if not providing your own provider
+  provider,                  // Only required if not providing your own web3 instance
+  web3,                      // Only required if not providing your own provider
   etherscan: {
     apiKey: etherscanApiKey, // Only required if not providing abi in contract request configuration
-    delayTime: 300, // delay time between etherscan ABI reqests. default is 300 ms
+    delayTime: 300,          // delay time between etherscan ABI reqests. default is 300 ms
   },
 }
 
@@ -102,10 +104,10 @@ const contracts = [
       "0x5dbcF33D8c2E976c6b560249878e6F1491Bca25c",
       "0x29E240CFD7946BA20895a7a02eDb25C210f9f324",
     ],
-    allMethods: true,
+    allReadMethods: true,
     groupByNamespace: false,
     logging: false,
-    methods: [
+    readMethods: [
       {
         name: "balanceOf",
         args: ["0x1A91C0Df156A5F38aEC0813d055aA0184Fc47826"],
@@ -119,8 +121,8 @@ const contracts = [
   {
     namespace: "stakingPools",
     addresses: ["0xBa37B002AbaFDd8E89a1995dA52740bbC013D992"],
-    allMethods: false,
-    methods: [
+    allReadMethods: false,
+    readMethods: [
       {
         name: "balanceOf",
         args: ["0x29E240CFD7946BA20895a7a02eDb25C210f9f324"],
