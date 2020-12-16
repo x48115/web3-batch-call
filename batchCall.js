@@ -244,10 +244,13 @@ class BatchCall {
 
     if (this.simplifyResponse) {
       const flattenArgs = (contract) => {
-        const flattenArg = (val, key) => {
-          const flattenedVal = val[0].value;
-          if (flattenedVal) {
-            contract[key] = flattenedVal;
+        const flattenArg = (args, key) => {
+          const onlyOneArg = _.size(args) === 1;
+          if (onlyOneArg) {
+            const flattenedVal = args[0].value;
+            if (flattenedVal) {
+              contract[key] = flattenedVal;
+            }
           }
         };
         _.each(contract, flattenArg);
