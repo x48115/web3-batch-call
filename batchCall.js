@@ -46,7 +46,8 @@ class BatchCall {
   async execute(contractsBatch, blockNumber) {
     const startTime = Date.now();
     let numberOfMethods = 0;
-    const { web3 } = this;
+    const { web3, store, readContracts, groupByNamespace, logging } = this;
+
     const addContractToBatch = async (batch, contractConfig) => {
       const {
         addresses,
@@ -83,7 +84,7 @@ class BatchCall {
         abi = item.options.jsonInterface;
       } else {
         address = item;
-        abi = this.store.getAbiFromCache(address);
+        abi = store.getAbiFromCache(address);
       }
 
       const contract = new web3.eth.Contract(abi, address);
@@ -91,14 +92,12 @@ class BatchCall {
       let allMethods = _.clone(readMethods);
       if (allReadMethods) {
         const formatField = (name) => ({ name });
-        const allFields = this.store
-          .getReadableAbiFields(address)
-          .map(formatField);
+        const allFields = store.getReadableAbiFields(address).map(formatField);
         allMethods.push(...allFields);
       }
 
       const filterOutConstants = (method) => {
-        const readContractAtLeastOnce = this.readContracts[address];
+        const readContractAtLeastOnce = readContracts[address];
         const { constant } = method;
         if (constant && readContractAtLeastOnce) {
           return false;
@@ -111,7 +110,7 @@ class BatchCall {
         addMethodToBatch.bind(null, batch, contract, abi, address)
       );
       const methodsState = await Promise.all(methodsPromises);
-      this.readContracts[address] = true;
+      readContracts[address] = true;
       return Promise.resolve({
         address,
         namespace,
@@ -220,7 +219,7 @@ class BatchCall {
     const addAbis = async (contractBatch) => {
       const { abi, addresses } = contractBatch;
       for (const address of addresses) {
-        await this.store.addAbiToCache(address, abi);
+        await store.addAbiToCache(address, abi);
       }
     };
     for (const contractBatch of contractsBatch) {
@@ -231,6 +230,7 @@ class BatchCall {
     }
 
     const batch = new web3.BatchRequest();
+
     const contractsPromises = contractsBatch.map(
       addContractToBatch.bind(null, batch)
     );
@@ -239,7 +239,6 @@ class BatchCall {
     batch.execute();
     const contractsPromiseResult = await Promise.all(contractsPromises);
     contractsState = _.reduce(contractsPromiseResult, formatContractsState, []);
-
     let contractsToReturn = contractsState;
 
     if (this.simplifyResponse) {
@@ -259,7 +258,7 @@ class BatchCall {
       contractsToReturn = _.map(contractsToReturn, flattenArgs);
     }
 
-    if (this.groupByNamespace) {
+    if (groupByNamespace) {
       const contractsStateByNamespace = _.groupBy(contractsState, "namespace");
 
       const removeNamespaceKey = (acc, contracts, key) => {
@@ -275,7 +274,7 @@ class BatchCall {
       );
       contractsToReturn = contractsStateByNamespaceReduced;
     }
-    if (this.logging) {
+    if (logging) {
       const endTime = Date.now();
       const executionTime = endTime - startTime;
       console.log(
