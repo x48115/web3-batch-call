@@ -2,6 +2,10 @@
 
 web3-batch-call is a tool for querying large amounts of contract data in one json-rpc call.
 
+## Warning
+
+This module is highly experimental. Please do not expect the API to stay the same between versions. The module is currently being battle tested.
+
 ## Interact
 
 https://batchcall.finance (currently down)

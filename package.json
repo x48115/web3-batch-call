@@ -1,6 +1,6 @@
 {
   "name": "web3-batch-call",
-  "version": "1.0.8",
+  "version": "0.1.0",
   "description": "",
   "main": "batchCall.js",
   "repository": {
