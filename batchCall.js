@@ -53,13 +53,14 @@ class BatchCall {
     const currentBlockNumber = await web3.eth.getBlockNumber();
 
     // Build list of blocks to read ("blocks")
-    const blocks = [];
+    let blocks = [];
     let blockNumberIterator = 0;
     while (blockNumberIterator < blockHeight) {
       const blockNumber = currentBlockNumber - blockNumberIterator;
       blocks.push(blockNumber);
       blockNumberIterator += blockResolution;
     }
+    blocks = _.reverse(blocks);
 
     // First level. Add each contractConfig from the batch request
     const addContractToBatch = async (batch, contractConfig) => {
