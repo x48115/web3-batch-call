@@ -4,7 +4,7 @@ web3-batch-call is a tool for querying large amounts of contract data in one jso
 
 ## Interact
 
-https://batchcall.finance
+https://batchcall.finance (currently down)
 
 ##### ^ ^ ^ This website uses an outdated version (1.0.0). For proper usage example see "Example Request" below.
 
@@ -17,7 +17,7 @@ https://batchcall.finance
 - Supply your own ABIs or automatically fetch and cache ABIs
 - Supports localStorage or in-memory stores
 - Supports custom contract namespaces
-- Supports historical blocks
+- Supports historical block range
 - Automatically prevents calling constant methods more than once
 - Isomorphic (works on node and in the browser)
 
@@ -85,9 +85,14 @@ const options = {
   },
 }
 
+const callOptions = {
+  blockHeight: 1,            // Historical blocks to read (60 * (60/15) = 240)... Enter 240 for one hours worth of data
+  blockResolution: 1,        // Historical block resolution. Enter 4 to scan in one minute intervals
+};
+
 const batchCall = new BatchCall(options);
 const contracts = yourContractsArray
-const result = await batchCall.execute(contracts, blockNumber);
+const result = await batchCall.execute(contracts, callOptions);
 
 console.log(result);
 ```
