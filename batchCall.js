@@ -46,7 +46,8 @@ class BatchCall {
   async execute(contractsBatch, callOptions) {
     // Constants
     const startTime = Date.now();
-    const { blockHeight = 1, blockResolution = 1 } = callOptions;
+    const blockHeight = _.get(callOptions, "blockHeight", 1);
+    const blockResolution = _.get(callOptions, "blockResolution", 1);
     const { web3, store, readContracts, groupByNamespace, logging } = this;
     let numberOfMethods = 0;
     const currentBlockNumber = await web3.eth.getBlockNumber();
@@ -184,7 +185,7 @@ class BatchCall {
       let methodCall;
       const methodExists = _.get(contract.methods, name);
       if (!methodExists) {
-        return Promise.reject();
+        return Promise.resolve();
       }
       const nbrAbiArgsForMethod = _.size(abiMethod.inputs);
       const newArgs = _.take(args, nbrAbiArgsForMethod);
