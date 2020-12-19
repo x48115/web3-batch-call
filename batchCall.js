@@ -159,7 +159,7 @@ class BatchCall {
               );
             }
             blockResolve({
-              value: data || "N/A",
+              value: data,
               blockNumber,
             });
           };
