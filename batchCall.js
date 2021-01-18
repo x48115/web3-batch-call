@@ -71,6 +71,7 @@ class BatchCall {
         readMethods = [],
         allReadMethods,
       } = contractConfig;
+
       const objectToIterateOver = addresses || contracts;
       const addressPromises = await objectToIterateOver.map(
         addAddressToBatch.bind(
@@ -153,7 +154,7 @@ class BatchCall {
       new Promise((blockResolve) => {
         try {
           const returnResponse = (blockNumber, err, data) => {
-            if (err) {
+            if (err && logging) {
               console.log(
                 `[BatchCall] ${address}: method call failed: ${name}`
               );
