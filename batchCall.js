@@ -187,6 +187,11 @@ class BatchCall {
       let methodCall;
       const methodExists = _.get(contract.methods, name);
       if (!methodExists) {
+        if (logging) {
+          console.log(
+            `[BatchCall] Method "${method.name}" does not exist in ABI for contract "${address}"`
+          );
+        }
         return Promise.resolve();
       }
       const nbrAbiArgsForMethod = _.size(abiMethod.inputs);

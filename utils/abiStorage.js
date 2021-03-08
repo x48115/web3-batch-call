@@ -83,7 +83,7 @@ class Storage {
     const cacheAbi = (newAbi) => {
       const abiHashByAddress = this.getAbiHashByAddress() || {};
       const abiByHash = this.getAbiByHash() || {};
-      const abiHash = md5(newAbi);
+      const abiHash = md5(JSON.stringify(newAbi));
       abiByHash[abiHash] = newAbi;
       abiHashByAddress[address] = abiHash;
       this.store.setItem("abiByHash", JSON.stringify(abiByHash));
