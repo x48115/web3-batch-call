@@ -6,12 +6,6 @@ web3-batch-call is a tool for querying large amounts of contract data in one jso
 
 This module is highly experimental. Please do not expect the API to stay the same between versions. The module is currently being battle tested.
 
-## Interact
-
-https://batchcall.finance (currently down)
-
-##### ^ ^ ^ This website uses an outdated version (1.0.0). For proper usage example see "Example Request" below.
-
 ## Features
 
 - Call out to many different contracts in a single batched request
